@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Генератор на работни листи по български език за 2. клас</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts for Bulgarian Handwriting & Clean Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Pangolin&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            kids: ['Pangolin', 'cursive'],
+            heading: ['Comfortaa', 'cursive']
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0284c7',
+              700: '#0369a1',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Styling for A4 Pages */
+    .a4-page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 18mm;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    /* Handwriting Lines for 2nd Grade: Narrow and Wide */
+    .lines-narrow-wide {
+      background-image: linear-gradient(to bottom, 
+        #94a3b8 1px, transparent 1px, 
+        transparent 8px, 
+        #cbd5e1 1px, transparent 1px, 
+        transparent 20px, 
+        #94a3b8 1px, transparent 1px);
+      background-size: 100% 29px;
+      line-height: 29px;
+    }
+
+    /* Standard Single Writing Lines */
+    .lines-standard {
+      background-image: linear-gradient(to bottom, transparent 95%, #cbd5e1 95%);
+      background-size: 100% 28px;
+      line-height: 28px;
+    }
+
+    /* Letter / Punctuation Box Styling */
+    .char-box {
+      width: 32px;
+      height: 32px;
+      border: 2px solid #475569;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      background-color: #ffffff;
+      margin: 0 4px;
+      vertical-align: middle;
+    }
+
+    /* Editable Inline Text Highlight */
+    .editable-active [contenteditable="true"] {
+      outline: 2px dashed #0284c7;
+      background-color: #f0f9ff;
+      border-radius: 3px;
+      padding: 0 4px;
+      cursor: text;
+    }
+
+    /* Print Specific Layout Settings */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm 15mm;
+      }
+      body {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: var(--print-font-size, 15px);
+      }
+      .no-print {
+        display: none !important;
+      }
+      .a4-page {
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        min-height: auto !important;
+      }
+      .task-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- TOP HEADER / CONTROL BAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 no-print shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <div class="flex items-center gap-3">
+        <button id="toggle-sidebar-btn" onclick="toggleSidebar()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition" title="Скрий/Покажи настройки">
+          <i data-lucide="sliders" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-2">
+          <div class="bg-amber-500 text-white p-2 rounded-xl shadow-sm">
+            <i data-lucide="book-open-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h1 class="font-heading font-bold text-lg text-slate-800 leading-tight">Генератор на работни листи</h1>
+            <p class="text-xs text-slate-500">Български език • 2. клас</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center flex-wrap gap-2">
+        <button onclick="generateWorksheet()" class="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-medium rounded-lg shadow-sm text-sm transition">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Генерирай
+        </button>
+
+        <button onclick="newVariant()" class="flex items-center gap-1.5 px-3.5 py-2 bg-slate-700 hover:bg-slate-800 text-white font-medium rounded-lg shadow-sm text-sm transition">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Нов вариант
+        </button>
+
+        <button id="edit-btn" onclick="toggleEditMode()" class="flex items-center gap-1.5 px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-lg shadow-sm text-sm transition">
+          <i data-lucide="edit-3" class="w-4 h-4 text-sky-600"></i> <span id="edit-btn-text">Редактирай</span>
+        </button>
+
+        <button onclick="toggleAnswerKey()" id="answers-btn" class="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 border border-emerald-300 text-emerald-700 hover:bg-emerald-100 font-medium rounded-lg shadow-sm text-sm transition">
+          <i data-lucide="key-round" class="w-4 h-4"></i> <span id="answers-btn-text">Отговори</span>
+        </button>
+
+        <button onclick="window.print()" class="flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white font-medium rounded-lg shadow-sm text-sm transition">
+          <i data-lucide="printer" class="w-4 h-4"></i> Печат / PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row gap-6 p-4 md:p-6">
+    
+    <!-- SIDEBAR SETTINGS PANEL -->
+    <aside id="settings-sidebar" class="w-full md:w-80 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm no-print flex-shrink-0 space-y-6 h-fit">
+      
+      <div class="flex items-center justify-between border-b pb-3 border-slate-100">
+        <h2 class="font-heading font-bold text-slate-800 flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-sky-600"></i> Настройки
+        </h2>
+        <span class="text-xs bg-sky-100 text-sky-700 font-semibold px-2 py-0.5 rounded-full">2. клас</span>
+      </div>
+
+      <!-- Theme Selection -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Тема на листа</label>
+        <select id="setting-theme" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          <option value="Есен" selected>🍁 Есен</option>
+          <option value="Пролет">🌸 Пролет</option>
+          <option value="Зима">❄️ Зима</option>
+          <option value="Семейство">🏠 Семейство</option>
+          <option value="Природа и животни">🐾 Природа и животни</option>
+          <option value="Училище">🎒 Училище</option>
+        </select>
+      </div>
+
+      <!-- Difficulty & Counts -->
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Трудност</label>
+          <select id="setting-difficulty" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-sky-500">
+            <option value="easy">Лесно</option>
+            <option value="medium" selected>Средно</option>
+            <option value="hard">По-трудно</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Брой задачи</label>
+          <select id="setting-tasks-count" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-sky-500">
+            <option value="3">3 задачи</option>
+            <option value="4">4 задачи</option>
+            <option value="5" selected>5 задачи</option>
+            <option value="6">6 задачи</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Examples per Task -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Примери в задача</label>
+        <select id="setting-examples-count" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white focus:ring-2 focus:ring-sky-500">
+          <option value="3">3 примера</option>
+          <option value="4" selected>4 примера</option>
+          <option value="5">5 примера</option>
+          <option value="6">6 примера</option>
+        </select>
+      </div>
+
+      <!-- Types of Exercises Checkboxes -->
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Видове упражнения</label>
+        <div class="space-y-2 text-sm text-slate-700 max-h-56 overflow-y-auto pr-1">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="fill_words" checked class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>А. Пропуснати думи в изречения</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="antonyms" checked class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>Б. Свързване на антоними</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="vowels_check" checked class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>В. Пропусната гласна с проверка</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="punctuation" checked class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>Г. Поставяне на препинателен знак</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="spelling_errors" class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>Д. Поправяне на грешки в текст</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="copy_text" checked class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>Е. Преписване на кратък текст</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="singular_plural" class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>Ж. Единствено и множествено число</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" value="fill_text" class="task-type-check rounded text-sky-600 focus:ring-sky-500">
+            <span>З. Пропуснати думи в свързан текст</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Page & Font Formatting -->
+      <div class="border-t pt-4 border-slate-100 space-y-3">
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Оформление и Страници</label>
+        
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="text-xs text-slate-500">Размер шрифт</span>
+            <select id="setting-font-size" onchange="applyFormattingSettings()" class="w-full border border-slate-300 rounded-lg p-1.5 text-sm bg-white">
+              <option value="14px">14 px</option>
+              <option value="15px" selected>15 px</option>
+              <option value="16px">16 px</option>
+              <option value="18px">18 px</option>
+            </select>
+          </div>
+          <div>
+            <span class="text-xs text-slate-500">Тип редове</span>
+            <select id="setting-line-type" onchange="applyFormattingSettings()" class="w-full border border-slate-300 rounded-lg p-1.5 text-sm bg-white">
+              <option value="narrow-wide" selected>Тесни/Широки</option>
+              <option value="standard">Обикновени</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input type="checkbox" id="setting-show-eval" checked onchange="applyFormattingSettings()" class="rounded text-sky-600">
+            <span>Включи самооценка ("Как се справих?")</span>
+          </label>
+          <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input type="checkbox" id="setting-two-pages" onchange="applyFormattingSettings()" class="rounded text-sky-600">
+            <span>Раздели на 2 листа А4</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Custom School Logo Upload -->
+      <div class="border-t pt-4 border-slate-100">
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Училищно лого</label>
+        <input type="file" id="logo-file-input" accept="image/*" onchange="handleLogoUpload(event)" class="block w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100 cursor-pointer"/>
+        <button id="remove-logo-btn" onclick="removeLogo()" class="hidden text-xs text-red-500 hover:underline mt-1">Премахни логото</button>
+      </div>
+
+      <!-- Custom Teacher Input -->
+      <div class="border-t pt-4 border-slate-100">
+        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">Собствени думи / Изречения</label>
+        <textarea id="setting-custom-words" rows="3" placeholder="Въведете ваши думи или изречения (по една на ред)..." class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+      </div>
+
+    </aside>
+
+    <!-- WORKSHEET PREVIEW CONTAINER -->
+    <main class="flex-1 flex flex-col items-center overflow-x-auto pb-12">
+      
+      <!-- EDIT MODE BANNER -->
+      <div id="edit-notice-banner" class="hidden no-print w-full max-w-[210mm] bg-amber-50 border border-amber-200 text-amber-800 px-4 py-2.5 rounded-xl mb-4 text-xs font-medium flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-amber-600"></i>
+          <span>Режим на редактиране е активен! Кликнете директно върху всеки текст в листа, за да го промените.</span>
+        </div>
+        <button onclick="toggleEditMode()" class="text-amber-700 underline font-semibold hover:text-amber-900">Готово</button>
+      </div>
+
+      <!-- A4 PAPER CONTENT -->
+      <div id="worksheet-paper" class="a4-page transition-all duration-200">
+        <!-- Dynamic content generated by JavaScript -->
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- DATABASE OF BULGARIAN LANGUAGE CONTENT FOR GRADE 2 ---
+    const DB = {
+      fill_words: {
+        "Есен": [
+          { sentence: "През есента листата на дърветата ___________.", answer: "пожълтяват" },
+          { sentence: "В гората прелитат ___________ птици.", answer: "прелетни" },
+          { sentence: "Вятърът духа и носи студен ___________.", answer: "дъжд" },
+          { sentence: "Децата събират вкусни ___________ в градината.", answer: "плодове" },
+          { sentence: "Есента носи богата ___________.", answer: "реколта" },
+          { sentence: "Катеричката събира ___________ за зимата.", answer: "жълъди" }
+        ],
+        "Пролет": [
+          { sentence: "През пролетта цъфтят първите ___________.", answer: "кокичета" },
+          { sentence: "Птиците се завръщат от ___________ страни.", answer: "топлите" },
+          { sentence: "Слънцето грее ярко и ___________ земята.", answer: "стопля" },
+          { sentence: "Дърветата се обличат в зелени ___________.", answer: "листа" }
+        ],
+        "Зима": [
+          { sentence: "Вън пада бял и пухкав ___________.", answer: "сняг" },
+          { sentence: "Децата правят весел ___________ човек.", answer: "снежен" },
+          { sentence: "Рекàта се покри с дебел ___________.", answer: "лед" },
+          { sentence: "Всички носят топли ___________ и шапки.", answer: "палта" }
+        ],
+        "Семейство": [
+          { sentence: "Моето семейство е много ___________.", answer: "сплотено" },
+          { sentence: "Баба пече вкусна ___________ за закуска.", answer: "баница" },
+          { sentence: "С татко обичаме да караме ___________.", answer: "колело" },
+          { sentence: "Мама ме прегръща с голяма ___________.", answer: "любов" }
+        ],
+        "Природа и животни": [
+          { sentence: "Заекът има дълги ___________ и бързи крака.", answer: "уши" },
+          { sentence: "В бистрата река плуват малки ___________.", answer: "рибки" },
+          { sentence: "Бухалът е мъдра ___________.", answer: "птица" },
+          { sentence: "Пчелата събира сладък ___________ от цветята.", answer: "прашец" }
+        ],
+        "Училище": [
+          { sentence: "В класната стая слушаме внимателно ___________.", answer: "учителката" },
+          { sentence: "В ученическата раница има нови ___________.", answer: "тетрадки" },
+          { sentence: "Звънецът бие за весела ___________.", answer: "междучасие" },
+          { sentence: "Ние учим родната ___________.", answer: "реч" }
+        ]
+      },
+
+      antonyms: {
+        "Есен": [
+          { pair: ["топъл", "студен"] },
+          { pair: ["сух", "мокър"] },
+          { pair: ["ден", "нощ"] },
+          { pair: ["висок", "нисък"] },
+          { pair: ["голям", "малък"] },
+          { pair: ["радост", "тъга"] }
+        ],
+        "Пролет": [
+          { pair: ["студен", "топъл"] },
+          { pair: ["мрачен", "светъл"] },
+          { pair: ["зима", "лято"] },
+          { pair: ["спящ", "буден"] }
+        ],
+        "Зима": [
+          { pair: ["бял", "черен"] },
+          { pair: ["студ", "горещина"] },
+          { pair: ["твърд", "мек"] },
+          { pair: ["първи", "последен"] }
+        ],
+        "Общи": [
+          { pair: ["добър", "злобен"] },
+          { pair: ["бърз", "бавен"] },
+          { pair: ["умен", "глупав"] },
+          { pair: ["начало", "край"] },
+          { pair: ["млад", "стар"] },
+          { pair: ["пълен", "празен"] }
+        ]
+      },
+
+      vowels_check: [
+        { word: "д□рво", missing: "ъ", root: "дървен" },
+        { word: "м□ре", missing: "о", root: "морски" },
+        { word: "р□ка", missing: "ъ", root: "ръчен" },
+        { word: "з□мя", missing: "е", root: "земен" },
+        { word: "п□ляна", missing: "о", root: "поле" },
+        { word: "цв□тя", missing: "е", root: "цвят" },
+        { word: "ст□на", missing: "е", root: "стенен" },
+        { word: "з□бче", missing: "ъ", root: "зъб" },
+        { word: "в□да", missing: "о", root: "водна" },
+        { word: "г□ра", missing: "о", root: "горски" },
+        { word: "л□пило", missing: "е", root: "лепиш" },
+        { word: "кр□ка", missing: "а", root: "крак" }
+      ],
+
+      punctuation: {
+        "Есен": [
+          { text: "Вън духа студен есенен вятър", mark: "." },
+          { text: "Колко красиви са есенните листа", mark: "!" },
+          { text: "Кога отлитат птиците на юг", mark: "?" },
+          { text: "Децата събират кестени в парка", mark: "." },
+          { text: "Охо, колко много ябълки са узрели", mark: "!" },
+          { text: "Обичаш ли да разхождаш в гората", mark: "?" }
+        ],
+        "Пролет": [
+          { text: "Настъпи топлата пролет", mark: "." },
+          { text: "Ето, първото кокиче цъфна", mark: "!" },
+          { text: "Чуваш ли песента на пойните птички", mark: "?" }
+        ],
+        "Зима": [
+          { text: "През нощта заваля пухкав сняг", mark: "." },
+          { text: "Ура, имаме нов снежен човек", mark: "!" },
+          { text: "Ще караме ли шейни днес", mark: "?" }
+        ],
+        "Общи": [
+          { text: "Учениците четат интересна приказка", mark: "." },
+          { text: "Еха, каква прекрасна дъга", mark: "!" },
+          { text: "Кой написа това красиво написано домашно", mark: "?" }
+        ]
+      },
+
+      spelling_errors: {
+        "Есен": [
+          {
+            text: "През есента в гората пада мрак. Вятъра духа и сгрява зраната земя с шумящи листа.",
+            errorsCount: 2,
+            correctText: "През есента в гората пада мрак. Вятърът духа и покрива измръзналата земя с шумящи листа."
+          },
+          {
+            text: "Жълтите листове падат от дварвото. Децата тичат в парка и сабират кестени.",
+            errorsCount: 3,
+            correctText: "Жълтите листа падат от дървото. Децата тичат в парка и събират кестени."
+          }
+        ],
+        "Общи": [
+          {
+            text: "Малкия юнак тръгна към реката. Там видя голяма рѝбка и я улови.",
+            errorsCount: 2,
+            correctText: "Малкият юнак тръгна към реката. Там видя голяма рибка и я улови."
+          }
+        ]
+      },
+
+      copy_text: {
+        "Есен": [
+          "Есента е златен сезон. Листата се обагрят в жълто, червено и кафяво. Вятърът ги танцува във въздуха.",
+          "Птиците отлитат към топлите страни. Животните събират храна за зимата. Всички се подготвят за студените дни."
+        ],
+        "Пролет": [
+          "Пролетта дойде с много слънце и цветя. Птичките пеят весели песни. Гората се събужда за нов живот."
+        ],
+        "Зима": [
+          "Зимата покри земята с бяла премяна. Децата правят голям снежен човек. Всички се радват на снега."
+        ],
+        "Семейство": [
+          "Вкъщи винаги е топло и уютно. Заедно четем приказки и разговаряме. Обичам моето семейство."
+        ],
+        "Природа и животни": [
+          "Гората е дом на много животни. Там живеят сърнички, катерички и лисици. Пазете природата чиста!"
+        ],
+        "Училище": [
+          "Училището е прозорец към знанието. Всички ученици четат и пишат с желание. Учителката ни помага всеки ден."
+        ]
+      },
+
+      singular_plural: [
+        { sing: "молив", plur: "моливи" },
+        { sing: "дърво", plur: "дървета" },
+        { sing: "птица", plur: "птици" },
+        { sing: "книга", plur: "книги" },
+        { sing: "дете", plur: "деца" },
+        { sing: "цвят", plur: "цветя" },
+        { sing: "ябълка", plur: "ябълки" },
+        { sing: "лист", plur: "листа" }
+      ],
+
+      fill_text: {
+        "Есен": [
+          {
+            template: "Дойде 1. ___________ есен. В гората падат 2. ___________ листа. Птиците отлитат на 3. ___________.",
+            words: ["златната", "цветни", "юг"],
+            answers: ["златната", "цветни", "юг"]
+          }
+        ],
+        "Общи": [
+          {
+            template: "В 1. ___________ стая учениците пишат 2. ___________ задачи. Всички са 3. ___________.",
+            words: ["светлата", "интересни", "внимателни"],
+            answers: ["светлата", "интересни", "внимателни"]
+          }
+        ]
+      }
+    };
+
+    // --- APPLICATION STATE ---
+    let currentWorksheetData = [];
+    let customLogoUrl = null;
+    let isEditMode = false;
+    let isShowingAnswers = false;
+
+    // Initialize Lucide icons on load
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      generateWorksheet();
+    });
+
+    // Toggle Sidebar Visibility
+    function toggleSidebar() {
+      const sidebar = document.getElementById("settings-sidebar");
+      sidebar.classList.toggle("hidden");
+    }
+
+    // Logo Upload Handling
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          customLogoUrl = e.target.result;
+          document.getElementById("remove-logo-btn").classList.remove("hidden");
+          renderWorksheetHTML();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeLogo() {
+      customLogoUrl = null;
+      document.getElementById("logo-file-input").value = "";
+      document.getElementById("remove-logo-btn").classList.add("hidden");
+      renderWorksheetHTML();
+    }
+
+    // Helper: Shuffle array randomly
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // --- MAIN GENERATION LOGIC ---
+    function generateWorksheet() {
+      isShowingAnswers = false;
+      document.getElementById("answers-btn-text").innerText = "Отговори";
+
+      const theme = document.getElementById("setting-theme").value;
+      const tasksCount = parseInt(document.getElementById("setting-tasks-count").value, 10);
+      const examplesCount = parseInt(document.getElementById("setting-examples-count").value, 10);
+      
+      const selectedTaskTypes = Array.from(document.querySelectorAll('.task-type-check:checked'))
+                                     .map(cb => cb.value);
+
+      if (selectedTaskTypes.length === 0) {
+        alert("Моля, изберете поне един вид упражнение от настройките!");
+        return;
+      }
+
+      currentWorksheetData = [];
+
+      // Pick selected task types up to tasksCount
+      let typesToGenerate = [...selectedTaskTypes];
+      while (typesToGenerate.length < tasksCount) {
+        typesToGenerate = typesToGenerate.concat(selectedTaskTypes);
+      }
+      typesToGenerate = typesToGenerate.slice(0, tasksCount);
+
+      // Generate Data for each task type
+      typesToGenerate.forEach((type, index) => {
+        const taskNum = index + 1;
+        const taskData = generateTaskData(type, theme, examplesCount, taskNum);
+        if (taskData) {
+          currentWorksheetData.push(taskData);
+        }
+      });
+
+      renderWorksheetHTML();
+    }
+
+    function newVariant() {
+      generateWorksheet();
+    }
+
+    // Task Generators
+    function generateTaskData(type, theme, count, num) {
+      switch (type) {
+        case "fill_words": {
+          const bank = DB.fill_words[theme] || DB.fill_words["Есен"];
+          const selected = shuffle(bank).slice(0, count);
+          const wordsToChoose = shuffle(selected.map(item => item.answer));
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Попълни пропуснатите думи в изреченията.`,
+            instruction: `Използвай думите от кутията по-долу. Всяка дума се използва само веднъж.`,
+            items: selected,
+            wordsToChoose,
+            answerKey: selected.map(s => `${s.sentence.replace('________', s.answer)}`)
+          };
+        }
+
+        case "antonyms": {
+          const bank = (DB.antonyms[theme] || []).concat(DB.antonyms["Общи"]);
+          const selected = shuffle(bank).slice(0, count);
+          const leftCol = selected.map(item => item.pair[0]);
+          const rightCol = shuffle(selected.map(item => item.pair[1]));
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Свържи думите с противоположно значение (антоними).`,
+            instruction: `Начертай линия от всяка дума вляво към нейната противоположна дума вдясно.`,
+            leftCol,
+            rightCol,
+            pairs: selected.map(i => i.pair),
+            answerKey: selected.map(i => `${i.pair[0]} — ${i.pair[1]}`)
+          };
+        }
+
+        case "vowels_check": {
+          const selected = shuffle(DB.vowels_check).slice(0, count);
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Попълни пропуснатата гласна буква (а–ъ, о–у, е–и) и напиши дума за проверка.`,
+            instruction: `Вโพстави вярната буква в квадратчето и напиши думата за проверка на линията.`,
+            items: selected,
+            answerKey: selected.map(i => `${i.word.replace('□', i.missing)} (проверка: ${i.root})`)
+          };
+        }
+
+        case "punctuation": {
+          const bank = DB.punctuation[theme] || DB.punctuation["Общи"];
+          const selected = shuffle(bank).slice(0, count);
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Постави правилния краен препинателен знак (. ? !).`,
+            instruction: `Прочети изреченията внимателно и впиши знак в квадратчето в края.`,
+            items: selected,
+            answerKey: selected.map(i => `${i.text} [ ${i.mark} ]`)
+          };
+        }
+
+        case "spelling_errors": {
+          const bank = DB.spelling_errors[theme] || DB.spelling_errors["Общи"];
+          const chosen = shuffle(bank)[0] || DB.spelling_errors["Общи"][0];
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Открий и поправи правописните грешки.`,
+            instruction: `В следния текст има точно ${chosen.errorsCount} правописни грешки. Открий ги и препиши текста правилно:`,
+            text: chosen.text,
+            errorsCount: chosen.errorsCount,
+            correctText: chosen.correctText,
+            linesCount: 3,
+            answerKey: [chosen.correctText]
+          };
+        }
+
+        case "copy_text": {
+          const bank = DB.copy_text[theme] || DB.copy_text["Есен"];
+          const text = shuffle(bank)[0];
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Препиши красив и грамотен текст.`,
+            instruction: `Прочети текста и го препиши внимателно на редовете отдолу:`,
+            text: text,
+            linesCount: 4,
+            answerKey: [text]
+          };
+        }
+
+        case "singular_plural": {
+          const selected = shuffle(DB.singular_plural).slice(0, count);
+          const leftCol = selected.map(i => i.sing);
+          const rightCol = shuffle(selected.map(i => i.plur));
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Свържи думите в единствено и множествено число.`,
+            instruction: `Свържи с линия думата от лявата колона със съответната форма вдясно.`,
+            leftCol,
+            rightCol,
+            answerKey: selected.map(i => `${i.sing} — ${i.plur}`)
+          };
+        }
+
+        case "fill_text": {
+          const bank = DB.fill_text[theme] || DB.fill_text["Общи"];
+          const chosen = shuffle(bank)[0] || DB.fill_text["Общи"][0];
+          return {
+            num,
+            type,
+            title: `Задача ${num}. Попълни пропуснатите думи в текста.`,
+            instruction: `Използвай думите от рамката, за да допълниш текста:`,
+            template: chosen.template,
+            words: shuffle(chosen.words),
+            answers: chosen.answers,
+            answerKey: [chosen.template.replace(/1\. ___________/g, chosen.answers[0])
+                                         .replace(/2\. ___________/g, chosen.answers[1])
+                                         .replace(/3\. ___________/g, chosen.answers[2])]
+          };
+        }
+      }
+    }
+
+    // --- RENDER HTML TO A4 PAGE ---
+    function renderWorksheetHTML() {
+      const theme = document.getElementById("setting-theme").value;
+      const paper = document.getElementById("worksheet-paper");
+      const fontSize = document.getElementById("setting-font-size").value;
+      const lineType = document.getElementById("setting-line-type").value;
+      const showEval = document.getElementById("setting-show-eval").checked;
+      const twoPages = document.getElementById("setting-two-pages").checked;
+
+      // Set font size custom variable for print CSS
+      document.body.style.setProperty('--print-font-size', fontSize);
+
+      let logoHTML = '';
+      if (customLogoUrl) {
+        logoHTML = `<img src="${customLogoUrl}" alt="Лого" class="h-14 object-contain max-w-[120px]" />`;
+      }
+
+      let html = `
+        <div class="${isEditMode ? 'editable-active' : ''}" style="font-size: ${fontSize}; font-family: 'Inter', sans-serif;">
+          
+          <!-- HEADER SECTION -->
+          <div class="border-b-2 border-slate-800 pb-3 mb-5">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex-1">
+                <h1 class="font-heading text-xl md:text-2xl font-bold tracking-tight text-slate-900 uppercase">
+                  РАБОТЕН ЛИСТ ПО БЪЛГАРСКИ ЕЗИК
+                </h1>
+                <p class="text-sm font-semibold text-slate-700 mt-1">Тема: <span contenteditable="${isEditMode}">${theme}</span> (2. клас)</p>
+              </div>
+              ${logoHTML}
+            </div>
+
+            <!-- NAME / CLASS / DATE FIELDS -->
+            <div class="grid grid-cols-3 gap-2 mt-4 text-xs font-semibold text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+              <div>Име: <span class="border-b border-dotted border-slate-600 inline-block w-3/4">&nbsp;</span></div>
+              <div>Клас: <span class="border-b border-dotted border-slate-600 inline-block w-1/2">&nbsp;</span></div>
+              <div>Дата: <span class="border-b border-dotted border-slate-600 inline-block w-1/2">&nbsp;</span></div>
+            </div>
+          </div>
+      `;
+
+      // VIEW: TEACHER ANSWER KEY ONLY
+      if (isShowingAnswers) {
+        html += `
+          <div class="bg-amber-50 border-2 border-amber-300 p-4 rounded-xl mb-6">
+            <h2 class="font-heading font-bold text-amber-900 text-lg mb-1 flex items-center gap-2">
+              <i data-lucide="key" class="w-5 h-5 text-amber-700"></i> КЛЮЧ С ОТГОВОРИ (За учителя)
+            </h2>
+            <p class="text-xs text-amber-700">Този лист съдържа верните отговори за бърза проверка.</p>
+          </div>
+          <div class="space-y-6">
+        `;
+
+        currentWorksheetData.forEach((task) => {
+          html += `
+            <div class="bg-white border border-slate-300 rounded-xl p-4 shadow-sm">
+              <h3 class="font-bold text-slate-800 border-b border-slate-200 pb-2 mb-2">${task.title}</h3>
+              <ul class="list-disc list-inside space-y-1 text-slate-700 text-sm">
+                ${task.answerKey.map(ans => `<li>${ans}</li>`).join('')}
+              </ul>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+        paper.innerHTML = html;
+        lucide.createIcons();
+        return;
+      }
+
+      // VIEW: REGULAR STUDENT WORKSHEET
+      html += `<div class="space-y-6">`;
+
+      currentWorksheetData.forEach((task, index) => {
+        // Page break logic if 2 pages option is enabled
+        const pageBreakClass = (twoPages && index === Math.floor(currentWorksheetData.length / 2)) ? 'page-break pt-6' : '';
+
+        html += `<div class="task-block bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative ${pageBreakClass}">`;
+        
+        // Task Title & Instructions
+        html += `
+          <div class="mb-3">
+            <h3 class="font-heading font-bold text-slate-900 text-base" contenteditable="${isEditMode}">${task.title}</h3>
+            <p class="text-xs text-slate-600 mt-0.5" contenteditable="${isEditMode}">${task.instruction}</p>
+          </div>
+        `;
+
+        // Render Task Sub-type
+        switch(task.type) {
+          
+          case "fill_words":
+            html += `
+              <div class="space-y-3 my-2">
+                ${task.items.map(item => `
+                  <div class="text-slate-800 leading-relaxed">
+                    <span contenteditable="${isEditMode}">${item.sentence.replace('________', '<span class="inline-block border-b-2 border-slate-800 min-w-[80px] text-center font-bold px-1">&nbsp;</span>')}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <!-- Words to choose box -->
+              <div class="mt-3 p-2.5 bg-slate-50 border border-slate-300 rounded-lg text-center">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Думи за избор:</span>
+                <div class="flex flex-wrap justify-center gap-2 text-sm font-semibold text-slate-800">
+                  ${task.wordsToChoose.map(w => `<span class="bg-white px-2.5 py-1 rounded border border-slate-200 shadow-sm" contenteditable="${isEditMode}">${w}</span>`).join('')}
+                </div>
+              </div>
+            `;
+            break;
+
+          case "antonyms":
+          case "singular_plural":
+            html += `
+              <div class="grid grid-cols-2 gap-8 my-3 px-4">
+                <div class="space-y-3 text-right">
+                  ${task.leftCol.map(w => `<div class="py-1.5 font-medium text-slate-800" contenteditable="${isEditMode}">${w}</div>`).join('')}
+                </div>
+                <div class="space-y-3 text-left">
+                  ${task.rightCol.map(w => `<div class="py-1.5 font-medium text-slate-800" contenteditable="${isEditMode}">${w}</div>`).join('')}
+                </div>
+              </div>
+            `;
+            break;
+
+          case "vowels_check":
+            html += `
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                ${task.items.map(item => `
+                  <div class="flex items-center gap-2 text-slate-800">
+                    <span contenteditable="${isEditMode}" class="font-medium">${item.word.split('□')[0]}</span>
+                    <span class="char-box text-transparent">_</span>
+                    <span contenteditable="${isEditMode}" class="font-medium">${item.word.split('□')[1] || ''}</span>
+                    <span class="text-slate-400 font-bold">—</span>
+                    <span class="border-b border-slate-400 flex-1 min-w-[90px] h-6 inline-block"></span>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+            break;
+
+          case "punctuation":
+            html += `
+              <div class="space-y-3 my-2">
+                ${task.items.map(item => `
+                  <div class="flex items-center justify-between gap-2 text-slate-800">
+                    <span contenteditable="${isEditMode}" class="leading-snug">${item.text}</span>
+                    <span class="char-box text-transparent flex-shrink-0">.</span>
+                  </div>
+                `).join('')}
+              </div>
+            `;
+            break;
+
+          case "spelling_errors":
+          case "copy_text":
+            const lines = Array(task.linesCount || 3).fill(0);
+            const lineStyleClass = (lineType === 'narrow-wide') ? 'lines-narrow-wide' : 'lines-standard';
+            html += `
+              <div class="mb-3 p-3 bg-slate-50 border border-slate-200 rounded-lg italic text-slate-800" contenteditable="${isEditMode}">
+                ${task.text}
+              </div>
+              <div class="mt-4 ${lineStyleClass} space-y-0" style="min-height: ${task.linesCount * 30}px;">
+                <!-- Empty Writing lines rendered via CSS background -->
+              </div>
+            `;
+            break;
+
+          case "fill_text":
+            html += `
+              <div class="leading-loose text-slate-800 my-2" contenteditable="${isEditMode}">
+                ${task.template.replace(/\d+\.\s___________/g, '<span class="inline-block border-b-2 border-slate-800 min-w-[70px] text-center font-bold px-1">&nbsp;</span>')}
+              </div>
+              <div class="mt-3 p-2 bg-slate-50 border border-slate-300 rounded-lg text-center">
+                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1">Думи за избор:</span>
+                <div class="flex flex-wrap justify-center gap-2 text-sm font-semibold text-slate-800">
+                  ${task.words.map(w => `<span class="bg-white px-2.5 py-0.5 rounded border border-slate-200 shadow-sm" contenteditable="${isEditMode}">${w}</span>`).join('')}
+                </div>
+              </div>
+            `;
+            break;
+        }
+
+        html += `</div>`; // End Task Block
+      });
+
+      // SELF EVALUATION SECTION ("Как се справих?")
+      if (showEval) {
+        html += `
+          <div class="task-block mt-6 border-t-2 border-dashed border-slate-300 pt-4 flex items-center justify-between px-2">
+            <span class="font-heading font-bold text-slate-700 text-sm">Как се справих? Огради:</span>
+            <div class="flex items-center gap-6 text-2xl">
+              <div class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                <span>😃</span>
+                <span class="text-[10px] text-slate-500 font-medium">Отлично</span>
+              </div>
+              <div class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                <span>😐</span>
+                <span class="text-[10px] text-slate-500 font-medium">Добре</span>
+              </div>
+              <div class="flex flex-col items-center cursor-pointer hover:scale-110 transition">
+                <span>🤔</span>
+                <span class="text-[10px] text-slate-500 font-medium">Трудно</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      html += `</div></div>`;
+      paper.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    // --- FORMATTING UPDATE HANDLERS ---
+    function applyFormattingSettings() {
+      renderWorksheetHTML();
+    }
+
+    // --- TOGGLE EDIT MODE ---
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const btnText = document.getElementById("edit-btn-text");
+      const banner = document.getElementById("edit-notice-banner");
+
+      if (isEditMode) {
+        btnText.innerText = "Приключи";
+        banner.classList.remove("hidden");
+      } else {
+        btnText.innerText = "Редактирай";
+        banner.classList.add("hidden");
+      }
+      renderWorksheetHTML();
+    }
+
+    // --- TOGGLE TEACHER ANSWER KEY ---
+    function toggleAnswerKey() {
+      isShowingAnswers = !isShowingAnswers;
+      const btnText = document.getElementById("answers-btn-text");
+      
+      if (isShowingAnswers) {
+        btnText.innerText = "Лист за ученика";
+      } else {
+        btnText.innerText = "Отговори";
+      }
+      renderWorksheetHTML();
+    }
+  </script>
+</body>
+</html>
